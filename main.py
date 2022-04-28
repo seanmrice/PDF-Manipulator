@@ -22,6 +22,11 @@ def TwoLTR2Tab(input_file, output_file):
         if orientation == "portrait":
             with open(input_file, "rb+"):
                 read_pdf = PyPDF2.PdfFileReader(input_file)
+                write_pdf = PyPDF2.PdfFileWriter()
+                merge_pdf = PyPDF2.PdfFileMerger(input_file)
+                page1 = read_pdf.getPage(0)
+                page2 = read_pdf.getPage(1)
+                write_pdf.addBlankPage(1224, 792)
                 # TODO Continue buildout of PDF combination
         else:
             return print("PDF is not set up correctly")
@@ -44,9 +49,28 @@ def SizeCheck(currentPdfWidth, currentPdfHeight, newHeight, newWidth):
     return "true"
 
 
-def main():
-    print("Placeholder")
+def getPDFCreator(file):
+    reader = PyPDF2.PdfFileReader(file)
+    info = reader.getDocumentInfo()
+    return info.creator
 
 
-if __name__ == '__main__':
-    main()
+def getPDFProducer(file):
+    reader = PyPDF2.PdfFileReader(file)
+    info = reader.getDocumentInfo()
+    return info.producer
+
+
+def PDFXchangeFinder(pdf):
+    # Find out if the PDF was created from a MS Word document using the PDF-XChange
+    # if it is found, return True, else return False
+    creator = getPDFCreator(pdf)
+    producer = getPDFProducer(pdf)
+    if creator.find("PDF-XChange") != -1:
+        print(f"{creator} found, APPE will probably not function correctly")
+        return True
+    if producer.find("PDF-XChange") != -1:
+        print(f"{producer}found, APPE will probably not function correctly")
+        return True
+    else:
+        return False
